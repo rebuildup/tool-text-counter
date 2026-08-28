@@ -1,1 +1,7 @@
-export default function TextCounterApp() { return <div>TextCounter placeholder</div>; }
+"use client";
+
+import TextCounterTool from "./components/TextCounterTool";
+
+export default function TextCounterApp() {
+	return <TextCounterTool />;
+}
