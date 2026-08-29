@@ -1,11 +1,51 @@
+# dependencies
 node_modules/
-.DS_Store
-*.log
-.env*
-!.env.example
-.vscode/
-.idea/
+.pnp/
+.pnp.js
+.yarn/
+
+# build outputs
 dist/
 build/
 .next/
 out/
+*.tsbuildinfo
+
+# generated caches
+.cache/
+.turbo/
+.eslintcache
+.vite/
+
+# test / coverage outputs
+coverage/
+.nyc_output/
+*.lcov
+
+# tool caches
+.bun/
+.knip/
+.biome/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# local-only verification artifacts
+.tmp/
+
+# reference repositories (policy §31)
+.reference/
+
+# actual dotenv (policy §32)
+.env
+.env.development
+.env.production
+.env.local
+.env.test
+!.env.example
+!.env.development.example
+!.env.production.example
