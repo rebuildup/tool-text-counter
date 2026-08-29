@@ -1,10 +1,10 @@
 "use client";
 
 import { getEncoding } from "js-tiktoken";
-import { useCallback, useMemo, useState } from "react";
-import { RawDOMContainer } from "../../../../external/ui/src/RawDOMContainer";
+import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 import type { CountSettings, TextStats } from "../types";
 import { calculateTextStats } from "../utils/textAnalysis";
+import { RawDOMContainer } from "./RawDOMContainer";
 
 const DEFAULT_SETTINGS: CountSettings = {
 	includeSpaces: true,
@@ -29,7 +29,7 @@ function TextInputSection({
 	onCopy,
 }: {
 	text: string;
-	onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+	onTextChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 	onClear: () => void;
 	onCopy: () => void;
 }) {
@@ -212,30 +212,14 @@ function ProgressBars({
 		<fieldset style={{ border: "1px solid #ccc", padding: "15px" }}>
 			<legend>Progress</legend>
 			<div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-				<ProgressBar
-					label="Target"
-					current={stats.totalCharacters}
-					max={targetLength}
-				/>
-				<ProgressBar
-					label="Max Limit"
-					current={stats.totalCharacters}
-					max={maxLength}
-				/>
+				<ProgressBar label="Target" current={stats.totalCharacters} max={targetLength} />
+				<ProgressBar label="Max Limit" current={stats.totalCharacters} max={maxLength} />
 			</div>
 		</fieldset>
 	);
 }
 
-function ProgressBar({
-	label,
-	current,
-	max,
-}: {
-	label: string;
-	current: number;
-	max: number;
-}) {
+function ProgressBar({ label, current, max }: { label: string; current: number; max: number }) {
 	return (
 		<div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
 			<div
@@ -250,11 +234,7 @@ function ProgressBar({
 				</span>
 				<span>{max}</span>
 			</div>
-			<progress
-				value={current}
-				max={max}
-				style={{ width: "100%", height: "15px" }}
-			/>
+			<progress value={current} max={max} style={{ width: "100%", height: "15px" }} />
 		</div>
 	);
 }
@@ -382,15 +362,12 @@ function TokenizerDetails({
 		>
 			<summary style={{ cursor: "pointer", fontSize: "0.95rem" }}>
 				Tokenizer (o200k_base) -{" "}
-				<strong>
-					{tokenCount !== null ? tokenCount : "Click to calculate"}
-				</strong>{" "}
-				Tokens
+				<strong>{tokenCount !== null ? tokenCount : "Click to calculate"}</strong> Tokens
 			</summary>
 			<div className="mt-2.5 p-2.5 border border-gray-200 bg-white max-h-[300px] overflow-y-auto text-[0.95rem] whitespace-pre-wrap break-all leading-[1.4]">
 				{tokenBlocks.map((block, i) => (
 					<span
-						key={`${block.id}-${i}`}
+						key={block.id}
 						style={{
 							backgroundColor: TOKEN_COLORS[i % TOKEN_COLORS.length],
 						}}
@@ -399,9 +376,7 @@ function TokenizerDetails({
 						{block.str}
 					</span>
 				))}
-				{tokenBlocks.length === 0 && isOpen && textLength > 0 && (
-					<span>Loading tokens...</span>
-				)}
+				{tokenBlocks.length === 0 && isOpen && textLength > 0 && <span>Loading tokens...</span>}
 				{textLength === 0 && <span style={{ color: "#999" }}>[ No Data ]</span>}
 			</div>
 		</details>
@@ -413,10 +388,7 @@ export default function TextCounterTool() {
 	const [settings, setSettings] = useState<CountSettings>(DEFAULT_SETTINGS);
 	const [isTokenizerOpen, setIsTokenizerOpen] = useState(false);
 
-	const stats: TextStats = useMemo(
-		() => calculateTextStats(text, settings),
-		[text, settings],
-	);
+	const stats: TextStats = useMemo(() => calculateTextStats(text, settings), [text, settings]);
 
 	const tokenData = useMemo(() => {
 		if (!isTokenizerOpen || !text)
@@ -424,9 +396,9 @@ export default function TextCounterTool() {
 		try {
 			const enc = getEncoding("o200k_base");
 			const tokens = enc.encode(text);
-			const blocks: TokenBlock[] = tokens.map((id, i) => ({
-				id: tokens[i],
-				str: enc.decode([tokens[i]]),
+			const blocks: TokenBlock[] = tokens.map((id) => ({
+				id,
+				str: enc.decode([id]),
 			}));
 			return { count: tokens.length, blocks };
 		} catch (e) {
@@ -435,12 +407,9 @@ export default function TextCounterTool() {
 		}
 	}, [text, isTokenizerOpen]);
 
-	const handleTextChange = useCallback(
-		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-			setText(e.target.value);
-		},
-		[],
-	);
+	const handleTextChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+		setText(e.target.value);
+	}, []);
 
 	const handleClear = useCallback(() => {
 		setText("");
@@ -450,12 +419,9 @@ export default function TextCounterTool() {
 		navigator.clipboard.writeText(text);
 	}, [text]);
 
-	const handleSettingChange = useCallback(
-		(key: keyof CountSettings, value: unknown) => {
-			setSettings((prev) => ({ ...prev, [key]: value }));
-		},
-		[],
-	);
+	const handleSettingChange = useCallback((key: keyof CountSettings, value: unknown) => {
+		setSettings((prev) => ({ ...prev, [key]: value }));
+	}, []);
 
 	return (
 		<RawDOMContainer
@@ -481,10 +447,7 @@ export default function TextCounterTool() {
 						onClear={handleClear}
 						onCopy={handleCopyText}
 					/>
-					<SettingsFieldset
-						settings={settings}
-						onSettingChange={handleSettingChange}
-					/>
+					<SettingsFieldset settings={settings} onSettingChange={handleSettingChange} />
 				</div>
 				<div
 					style={{
@@ -500,10 +463,7 @@ export default function TextCounterTool() {
 						maxLength={settings.maxLength}
 					/>
 					<BasicStatsTable stats={stats} />
-					<CharacterTypesTable
-						stats={stats}
-						specificString={settings.specificString}
-					/>
+					<CharacterTypesTable stats={stats} specificString={settings.specificString} />
 					<TokenizerDetails
 						tokenCount={tokenData.count}
 						tokenBlocks={tokenData.blocks}
