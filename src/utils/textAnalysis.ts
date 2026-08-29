@@ -1,8 +1,4 @@
-import type {
-	CharacterTypeBreakdown,
-	CountSettings,
-	TextStats,
-} from "../types";
+import type { CharacterTypeBreakdown, CountSettings, TextStats } from "../types";
 
 // Japanese character ranges
 const HIRAGANA_RANGE = /[\u3040-\u309F]/g;
@@ -10,10 +6,7 @@ const KATAKANA_RANGE = /[\u30A0-\u30FF]/g;
 const KANJI_RANGE = /[\u4E00-\u9FAF]/g;
 const ALPHANUMERIC_RANGE = /[A-Za-z0-9]/g;
 
-export function calculateTextStats(
-	rawText: string,
-	settings: CountSettings,
-): TextStats {
+export function calculateTextStats(rawText: string, settings: CountSettings): TextStats {
 	if (!rawText) {
 		return {
 			totalCharacters: 0,
@@ -60,9 +53,7 @@ export function calculateTextStats(
 	// Line and paragraph analysis
 	const lines = text.split("\n");
 	const lineCount = lines.length;
-	const paragraphCount = text
-		.split(/\n\s*\n/)
-		.filter((p) => p.trim().length > 0).length;
+	const paragraphCount = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length;
 
 	// Word count (handles both Japanese and English)
 	const wordCount = countWords(text);
@@ -77,33 +68,24 @@ export function calculateTextStats(
 	const nonEmptyLines = lines.filter((line) => line.trim().length > 0);
 	const averageCharactersPerLine =
 		nonEmptyLines.length > 0
-			? nonEmptyLines.reduce((sum, line) => sum + line.length, 0) /
-				nonEmptyLines.length
+			? nonEmptyLines.reduce((sum, line) => sum + line.length, 0) / nonEmptyLines.length
 			: 0;
 
 	const longestLineLength = Math.max(...lines.map((line) => line.length), 0);
 
 	const characterDensity =
-		totalCharacters > 0
-			? (charactersWithoutWhitespace / totalCharacters) * 100
-			: 0;
+		totalCharacters > 0 ? (charactersWithoutWhitespace / totalCharacters) * 100 : 0;
 
-	const averageWordsPerLine =
-		nonEmptyLines.length > 0 ? wordCount / nonEmptyLines.length : 0;
+	const averageWordsPerLine = nonEmptyLines.length > 0 ? wordCount / nonEmptyLines.length : 0;
 
 	// Advanced statistics
 	const manuscriptPages400 = Math.ceil(totalCharacters / 400);
-	const halfKanaCount = settings.checkHalfKana
-		? (text.match(/[\uFF61-\uFF9F]/g) || []).length
-		: 0;
+	const halfKanaCount = settings.checkHalfKana ? (text.match(/[\uFF61-\uFF9F]/g) || []).length : 0;
 
 	let specificStringCount = 0;
 	if (settings.specificString && settings.specificString.length > 0) {
 		// Escape special regex characters in the specific string
-		const escapedString = settings.specificString.replace(
-			/[.*+?^${}()|[\]\\]/g,
-			"\\$&",
-		);
+		const escapedString = settings.specificString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 		const regex = new RegExp(escapedString, "g");
 		specificStringCount = (text.match(regex) || []).length;
 	}
@@ -139,15 +121,12 @@ function countWords(text: string): number {
 
 	// For mixed Japanese/English text, we need a more sophisticated approach
 	// Split by whitespace for English words
-	const englishWords = trimmedText
-		.split(/\s+/)
-		.filter((word) => /[A-Za-z0-9]/.test(word));
+	const englishWords = trimmedText.split(/\s+/).filter((word) => /[A-Za-z0-9]/.test(word));
 
 	// For Japanese, we'll count character transitions as word boundaries
 	// This is a simplified approach - in reality, Japanese word segmentation is complex
-	const japaneseCharCount = (
-		trimmedText.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g) || []
-	).length;
+	const japaneseCharCount = (trimmedText.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g) || [])
+		.length;
 	const estimatedJapaneseWords = Math.ceil(japaneseCharCount / 2); // Rough estimate
 
 	// If text is primarily English, use space-based counting
@@ -162,9 +141,8 @@ function countWords(text: string): number {
 function countSentences(text: string): number {
 	if (!text.trim()) return 0;
 
-	// Japanese sentence endings: .！？
-	// English sentence endings: .!?
-	const sentenceEndings = /[.！？.!?]/g;
+	// Sentence-ending punctuation: ASCII (".!?") and full-width ("。！？")
+	const sentenceEndings = /[.!?。！？]/g;
 	const matches = text.match(sentenceEndings);
 	return matches ? matches.length : 1;
 }
@@ -177,8 +155,7 @@ function analyzeCharacterTypes(text: string) {
 
 	// Symbols are everything else (excluding whitespace)
 	const totalNonWhitespace = text.replace(/\s/g, "").length;
-	const symbols =
-		totalNonWhitespace - hiragana - katakana - kanji - alphanumeric;
+	const symbols = totalNonWhitespace - hiragana - katakana - kanji - alphanumeric;
 
 	return {
 		hiragana,

@@ -49,16 +49,6 @@ export interface CountSettings {
 	excludeUrls: boolean;
 }
 
-export interface DisplaySettings {
-	showBasicStats: boolean;
-	showDetailedStats: boolean;
-	showCharacterTypes: boolean;
-	showStructureStats: boolean;
-	showGraphs: boolean;
-	theme: "light" | "dark";
-	fontSize: "small" | "medium" | "large";
-}
-
 export interface CharacterTypeBreakdown {
 	hiragana: string[];
 	katakana: string[];

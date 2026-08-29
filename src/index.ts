@@ -1,2 +1,2 @@
-export { default } from "./TextCounterApp";
 export * from "./TextCounterApp";
+export { default } from "./TextCounterApp";
