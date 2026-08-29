@@ -2,7 +2,7 @@
 
 import { getEncoding } from "js-tiktoken";
 import { useCallback, useMemo, useState } from "react";
-import { RawDOMContainer } from "../../../../external/ui/src/RawDOMContainer";
+import { RawDOMContainer } from "../../../../src/components/tools-ui/RawDOMContainer";
 import type { CountSettings, TextStats } from "../types";
 import { calculateTextStats } from "../utils/textAnalysis";
 
