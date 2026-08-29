@@ -1,0 +1,40 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Format + Lint
+        run: bun run check
+
+      - name: Type-check
+        run: bun run typecheck
+
+      - name: Dependency analysis
+        run: bun run knip
+
+      - name: Test + Coverage
+        run: bun run test:coverage
+
+      - name: Build
+        run: bun run build
