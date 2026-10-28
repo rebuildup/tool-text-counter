@@ -8,6 +8,12 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "js-tiktoken": "^1.0.21",
     "react": "^19.2.8",
@@ -15,6 +21,13 @@
   },
   "peerDependencies": {
     "next": "^16.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12"
   },
   "license": "MIT"
 }
