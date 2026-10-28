@@ -1,10 +1,11 @@
 "use client";
 
-import { getEncoding } from "js-tiktoken";
+import type { ComponentType } from "react";
 import { useCallback, useMemo, useState } from "react";
-import { RawDOMContainer } from "../../../../src/components/tools-ui/RawDOMContainer";
 import type { CountSettings, TextStats } from "../types";
 import { calculateTextStats } from "../utils/textAnalysis";
+import { RawDOMContainer } from "./RawDOMContainer";
+import type { TokenizerPanelProps } from "./TokenizerDetails";
 
 const DEFAULT_SETTINGS: CountSettings = {
 	includeSpaces: true,
@@ -19,8 +20,6 @@ const DEFAULT_SETTINGS: CountSettings = {
 	excludeHtml: false,
 	excludeUrls: false,
 };
-
-type TokenBlock = { id: number; str: string };
 
 function TextInputSection({
 	text,
@@ -360,55 +359,21 @@ function StatsTable({ rows }: { rows: Array<[string, string]> }) {
 	);
 }
 
-const TOKEN_COLORS = ["#ffecb3", "#b3e5fc", "#c8e6c9", "#f8bbd0", "#e1bee7"];
-
-function TokenizerDetails({
-	tokenCount,
-	tokenBlocks,
-	isOpen,
-	textLength,
-	onToggle,
+/**
+ * The text statistics UI.
+ *
+ * `tokenizer` is an OPTIONAL panel component. The core statistics (total
+ * characters, characters without spaces / newlines / whitespace, words,
+ * lines, paragraphs, sentences, character types, UTF-8 byte size, the
+ * 400-character page estimate) are always rendered; the BPE tokenizer
+ * panel is not, because it pulls in a multi-megabyte ranks table. See
+ * `src/components/TokenizerDetails.tsx` for the size argument.
+ */
+export default function TextCounterTool({
+	tokenizer: TokenizerPanel,
 }: {
-	tokenCount: number | null;
-	tokenBlocks: TokenBlock[];
-	isOpen: boolean;
-	textLength: number;
-	onToggle: (open: boolean) => void;
+	tokenizer?: ComponentType<TokenizerPanelProps>;
 }) {
-	return (
-		<details
-			style={{ border: "1px solid #ccc", padding: "10px" }}
-			onToggle={(e) => onToggle((e.target as HTMLDetailsElement).open)}
-		>
-			<summary style={{ cursor: "pointer", fontSize: "0.95rem" }}>
-				Tokenizer (o200k_base) -{" "}
-				<strong>
-					{tokenCount !== null ? tokenCount : "Click to calculate"}
-				</strong>{" "}
-				Tokens
-			</summary>
-			<div className="mt-2.5 p-2.5 border border-gray-200 bg-white max-h-[300px] overflow-y-auto text-[0.95rem] whitespace-pre-wrap break-all leading-[1.4]">
-				{tokenBlocks.map((block, i) => (
-					<span
-						key={`${block.id}-${i}`}
-						style={{
-							backgroundColor: TOKEN_COLORS[i % TOKEN_COLORS.length],
-						}}
-						title={`Token ID: ${block.id}`}
-					>
-						{block.str}
-					</span>
-				))}
-				{tokenBlocks.length === 0 && isOpen && textLength > 0 && (
-					<span>Loading tokens...</span>
-				)}
-				{textLength === 0 && <span style={{ color: "#999" }}>[ No Data ]</span>}
-			</div>
-		</details>
-	);
-}
-
-export default function TextCounterTool() {
 	const [text, setText] = useState("");
 	const [settings, setSettings] = useState<CountSettings>(DEFAULT_SETTINGS);
 	const [isTokenizerOpen, setIsTokenizerOpen] = useState(false);
@@ -417,23 +382,6 @@ export default function TextCounterTool() {
 		() => calculateTextStats(text, settings),
 		[text, settings],
 	);
-
-	const tokenData = useMemo(() => {
-		if (!isTokenizerOpen || !text)
-			return { count: null as number | null, blocks: [] as TokenBlock[] };
-		try {
-			const enc = getEncoding("o200k_base");
-			const tokens = enc.encode(text);
-			const blocks: TokenBlock[] = tokens.map((id, i) => ({
-				id: tokens[i],
-				str: enc.decode([tokens[i]]),
-			}));
-			return { count: tokens.length, blocks };
-		} catch (e) {
-			console.error("Tokenizer error:", e);
-			return { count: null, blocks: [] as TokenBlock[] };
-		}
-	}, [text, isTokenizerOpen]);
 
 	const handleTextChange = useCallback(
 		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -504,13 +452,13 @@ export default function TextCounterTool() {
 						stats={stats}
 						specificString={settings.specificString}
 					/>
-					<TokenizerDetails
-						tokenCount={tokenData.count}
-						tokenBlocks={tokenData.blocks}
-						isOpen={isTokenizerOpen}
-						textLength={text.length}
-						onToggle={setIsTokenizerOpen}
-					/>
+					{TokenizerPanel && (
+						<TokenizerPanel
+							text={text}
+							isOpen={isTokenizerOpen}
+							onToggle={setIsTokenizerOpen}
+						/>
+					)}
 				</div>
 			</div>
 		</RawDOMContainer>
