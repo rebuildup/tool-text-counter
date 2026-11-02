@@ -395,7 +395,35 @@ export default function TextCounterTool({
 	}, []);
 
 	const handleCopyText = useCallback(() => {
-		navigator.clipboard.writeText(text);
+		// The Tool is served inside a sandboxed iframe, which can give the
+		// document an opaque origin. `navigator.clipboard` rejects there
+		// (and the rejection would surface as an unhandled promise), so the
+		// copy falls back to a selection-based `execCommand("copy")`.
+		const copyWithExecCommand = (value: string): boolean => {
+			const textarea = document.createElement("textarea");
+			textarea.value = value;
+			textarea.setAttribute("readonly", "");
+			textarea.style.position = "fixed";
+			textarea.style.opacity = "0";
+			document.body.appendChild(textarea);
+			textarea.select();
+			let copied = false;
+			try {
+				copied = document.execCommand("copy");
+			} catch {
+				copied = false;
+			}
+			textarea.remove();
+			return copied;
+		};
+
+		if (navigator.clipboard?.writeText) {
+			navigator.clipboard.writeText(text).catch(() => {
+				copyWithExecCommand(text);
+			});
+			return;
+		}
+		copyWithExecCommand(text);
 	}, [text]);
 
 	const handleSettingChange = useCallback(

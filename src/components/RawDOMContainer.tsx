@@ -16,6 +16,13 @@ interface BreadcrumbItem {
  *
  * Host apps can wrap or replace this with their own shell
  * implementation when embedding `@rebuildup/tool-text-counter`.
+ *
+ * The breadcrumb is rendered as text, never as links. The host serves
+ * this build at `/tools/text-counter/app/` inside an iframe, where the
+ * ancestor routes a breadcrumb would point at (`/`, `/tools`) are the
+ * host application, not the Tool — following one would navigate the
+ * frame away from the Tool. `href` stays in the item type because host
+ * callers pass it; the standalone shell deliberately ignores it.
  */
 export function RawDOMContainer({
 	title,
@@ -58,13 +65,9 @@ export function RawDOMContainer({
 									key={crumb.label}
 									style={{ display: "flex", alignItems: "center", gap: "5px" }}
 								>
-									{crumb.href && !isLast ? (
-										<a href={crumb.href}>{crumb.label}</a>
-									) : (
-										<span aria-current={isLast ? "page" : undefined}>
-											{crumb.label}
-										</span>
-									)}
+									<span aria-current={isLast ? "page" : undefined}>
+										{crumb.label}
+									</span>
 									{!isLast && <span aria-hidden="true">/</span>}
 								</li>
 							);
